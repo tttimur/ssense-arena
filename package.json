@@ -1,0 +1,24 @@
+{
+  "name": "ssense-arena",
+  "version": "1.0.0",
+  "description": "Run the program with Node. It will output an html file that can then be uploaded to are.na at https://www.are.na/import/upload.",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tttimur/ssense-arena.git"
+  },
+  "author": "Timur Fattahov <timur@56.digital> (https://timur.red)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tttimur/ssense-arena/issues"
+  },
+  "homepage": "https://github.com/tttimur/ssense-arena#readme",
+  "dependencies": {
+    "inquirer": "^6.3.1",
+    "node-fetch": "^2.3.0",
+    "puppeteer": "^1.14.0"
+  }
+}

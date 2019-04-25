@@ -1,6 +1,11 @@
 const puppeteer = require("puppeteer");
 const inquirer = require("inquirer");
-var fs = require("fs");
+const fetch = require("node-fetch")
+const fs = require("fs");
+
+const APIPrefix = `https://api.are.na/v2`
+let arenaSlug = undefined
+let arenaAccessToken = undefined
 
 let scrape = async () => {
   const browser = await puppeteer.launch({ headless: true });
@@ -15,12 +20,26 @@ let scrape = async () => {
       type: "password",
       name: "ssense-pw",
       message: "What's your SSense password?"
+    },
+    {
+      type: "input",
+      name: "arena-slug",
+      message: "What's your are.na channel slug?"
+    },
+    {
+      type: "input",
+      name: "arena-access-token",
+      message: "What's your are.na access token?"
     }
   ];
   await page.goto("https://www.ssense.com/en-us/account/login");
   await inquirer.prompt(questions).then(answers => {
     let se = answers["ssense-email"];
     let sp = answers["ssense-pw"];
+    
+    arenaSlug = answers["arena-slug"];
+    arenaAccessToken = answers["arena-access-token"]
+
     page.$eval("input[name=email]", (el, _se) => (el.value = _se), se);
     page.$eval("input[name=password]", (el, _sp) => (el.value = _sp), sp);
     page.$eval(
@@ -33,11 +52,11 @@ let scrape = async () => {
   await page.waitFor(1000);
 
   const result = await page.evaluate(() => {
-    let arr = "";
+    let arr = [];
     let items = document.querySelectorAll(".browsing-product-item > a");
 
     items.forEach(item => {
-      arr = '<DT><A HREF="' + item.href + '"></A>' + arr;
+      arr.push({ link: item.href })
     });
     return arr;
   });
@@ -46,14 +65,42 @@ let scrape = async () => {
   return result;
 };
 
-scrape().then(value => {
-  // writeFile function with filename, content and callback function
+let writeToFile = async value => {
   fs.writeFile(
-    "ssense-export.html",
-    "<!DOCTYPE NETSCAPE-Bookmark-file-1><HTML><DL><p>" + value + "</DL></HTML>",
-    function(err) {
+    "results.json",
+    JSON.stringify(value),
+    function (err) {
       if (err) throw err;
       console.log("File is created successfully.");
     }
   );
-});
+}
+
+let publishResultsToArena = async value => {
+  if (arenaAccessToken == null) return 'Access Token undefined'
+  if (arenaSlug == null) return 'Slug is not valid'
+  
+  value.forEach(async (item) => {
+    try {
+      const url = `${APIPrefix}/channels/${arenaSlug}/blocks?access_token=${arenaAccessToken}`
+      const data = {
+        "source": item.link
+      }
+
+      await fetch(`${APIPrefix}/channels/${arenaSlug}/blocks?access_token=${arenaAccessToken}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      })
+
+      console.log(`success: ${item.link}`)
+    } catch (err) {
+      console.log(err)
+    }
+  })
+}
+
+// scrape().then(writeToFile);
+scrape().then(publishResultsToArena)
