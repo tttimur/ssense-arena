@@ -4,7 +4,7 @@
   "description": "Run the program with Node. It will output an html file that can then be uploaded to are.na at https://www.are.na/import/upload.",
   "main": "test.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node test.js"
   },
   "repository": {
     "type": "git",

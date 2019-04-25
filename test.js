@@ -8,6 +8,8 @@ let arenaSlug = undefined
 let arenaAccessToken = undefined
 
 let scrape = async () => {
+  console.log('booting up...')
+
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   var questions = [
